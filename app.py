@@ -80,12 +80,14 @@ class ProductResource(Resource):
     
     def put(self, product_id):
         product_from_database = Products.query.get_or_404(product_id)
-        if "make" in request.json: 
-            product_from_database.make = request.json["make"]
-        if "model" in request.json: 
-            product_from_database.model = request.json["model"]
-        if "year" in request.json: 
-            product_from_database.year = request.json["year"]
+        if "name" in request.json: 
+            product_from_database.name = request.json["name"]
+        if "description" in request.json: 
+            product_from_database.description = request.json["description"]
+        if "price" in request.json: 
+            product_from_database.price = request.json["price"]
+        if "inventory_quantity" in request.json:
+            product_from_database.inventory_quantity = request.json["inventory_quantity"]
         db.session.commit()
         return product_schema.dump(product_from_database)
 
