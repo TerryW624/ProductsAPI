@@ -51,7 +51,44 @@ product_schema = ProductSchema()
 products_schema = ProductSchema(many=True)
 
 # Resources
+class ProductsResource(Resource):
+    def get(self):
+        all_products = Products.query.all()
+        return products_schema.dump(all_products)
 
+    def post(self):
+        print(request)
+        form_data = request.get_json()
+        try:
+            new_product = product_schema.load(form_data)
+            db.session.add(new_product)
+            db.session.commit()
+            return product_schema.dump(new_product), 201
+        except ValidationError as err:
+            return err.messages, 400
 
+class ProductResource(Resource):
+    def get(self, product_id):
+        product_from_database = Products.query.get_or_404(product_id)
+        return product_schema.dump(product_from_database)
+    
+    def delete(self, product_id):
+        product_from_database = Products.query.get_or_404(product_id)
+        db.session.delete(product_from_database)
+        db.session.commit()
+        return '', 204
+    
+    def put(self, product_id):
+        product_from_database = Products.query.get_or_404(product_id)
+        if "make" in request.json: 
+            product_from_database.make = request.json["make"]
+        if "model" in request.json: 
+            product_from_database.model = request.json["model"]
+        if "year" in request.json: 
+            product_from_database.year = request.json["year"]
+        db.session.commit()
+        return product_schema.dump(product_from_database)
 
 # Routes
+api.add_resource(ProductsResource, '/api/products')
+api.add_resource(ProductResource, '/api/products/<int:product_id>')
